@@ -10,19 +10,19 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     var itemArray = [Item()]
-    let titles = ["buy egg", "buy milk", "do homework"]
+    
     let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        
-        
+        /*
+        let titles = ["buy egg", "buy milk", "do homework"]
         for title in titles {
             let newItem = Item()
             newItem.title = title
             itemArray.append(newItem)
-        }
+        }*/
+        loadItems()
         /*
         if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
             itemArray = items
@@ -85,6 +85,17 @@ class TodoListViewController: UITableViewController {
             print("Error encoding item array, \(error)")
         }
         self.tableView.reloadData()
+    }
+    
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print ("Error decoding data, \(error)")
+            }
+        }
     }
 
     
