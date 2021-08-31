@@ -16,20 +16,9 @@ class TodoListViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        /*
-        let titles = ["buy egg", "buy milk", "do homework"]
-        for title in titles {
-            let newItem = Item()
-            newItem.title = title
-            itemArray.append(newItem)
-        }*/
-        print (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
-
+        //print (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         loadItems()
-        /*
-        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
-            itemArray = items
-        }*/
+        
     }
     
     //MARK: - tableView DataSource Methods
@@ -51,6 +40,7 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         //print("Row \(indexPath.row) selected")
         //print ("\(itemArray[indexPath.row])")
+        
         itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         saveItems()
         tableView.deselectRow(at: indexPath, animated: true)
@@ -90,15 +80,30 @@ class TodoListViewController: UITableViewController {
         self.tableView.reloadData()
     }
     
-    func loadItems() {
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
+    func loadItems(with request: NSFetchRequest<Item> = Item.fetchRequest()) { // = default: if not parameter, after = will be used
         do {
             itemArray = try context.fetch(request)
         } catch {
             print("Error fetching context, \(error)")
         }
-        
+        self.tableView.reloadData()
     }
+    func deleteItems(rowNum: Int) {
+        //rowrowNum = indexPath.row
+        context.delete(itemArray[rowNum])
+        itemArray.remove(at: rowNum)
+        saveItems()
+    }
+}
 
-    
+//MARK: - Search bar methods
+
+extension TodoListViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        let request : NSFetchRequest<Item> = Item.fetchRequest()
+        //print(searchBar.text!)
+        request.predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        loadItems(with: request)
+    }
 }
