@@ -106,4 +106,14 @@ extension TodoListViewController: UISearchBarDelegate {
         request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
         loadItems(with: request)
     }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchBar.text?.count == 0 {
+            loadItems()
+            //hide keyboard
+            DispatchQueue.main.async { //assign the queue to main thread
+                searchBar.resignFirstResponder()
+            }
+        }
+    }
 }
