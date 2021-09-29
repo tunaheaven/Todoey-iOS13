@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
     let realm = try! Realm()
     var todoItems: Results<Item>?
     var selectCategory: Category? {
@@ -30,8 +30,7 @@ class TodoListViewController: UITableViewController {
         return todoItems?.count ?? 1
     } //define how many rows to create
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
-        //print(indexPath.row)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath) //tap into super class cell
         if let item = todoItems?[indexPath.row] {
             cell.textLabel?.text = item.title
             cell.accessoryType = item.done ? .checkmark : .none
@@ -90,11 +89,24 @@ class TodoListViewController: UITableViewController {
     
     //MARK: - Model Manupulation Methods
     
-    
     func loadItems() {
         todoItems = selectCategory?.items.sorted(byKeyPath: "title", ascending: true)
         self.tableView.reloadData()
     }
+    
+    //delete
+    override func updateModel(at indexPath: IndexPath) {
+        if let item = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                    realm.delete(item)
+                }
+            } catch {
+                print ("Error updating item\(error)")
+            }
+        }
+    }
+    
 }
 
 //MARK: - Search bar methods
